@@ -5,3 +5,4 @@ export * from './carrom';
 export * from './chess';
 export * from './track-field';
 export * from './brackets';
+export * from './cricket';

@@ -20,6 +20,7 @@ import {
   defaultChessConfig,
   ChessMatchState,
 } from '@/engine';
+import { NativeCricketScorer } from './NativeCricketScorer';
 
 interface MultiSportScoringProps {
   sportType: SportType;
@@ -93,9 +94,16 @@ export function MultiSportScoringConsole({
   );
 
   // ----------------------------------------------------
-  // 5. CRICKET LEASE STATUS
+  // 5. TRACK SPRINTS TIMEKEEPER STATE
   // ----------------------------------------------------
-  const [cricketLeaseHolder, setCricketLeaseHolder] = useState<string | null>(null);
+  const [trackAthletes, setTrackAthletes] = useState([
+    { id: 'ath_t1', name: 'Usain Bolt', lane: 4, finishTime: '9.58', status: 'Q' },
+    { id: 'ath_t2', name: 'Yohan Blake', lane: 5, finishTime: '9.75', status: 'Q' },
+    { id: 'ath_t3', name: 'Justin Gatlin', lane: 3, finishTime: '9.79', status: 'Q' },
+    { id: 'ath_t4', name: 'Tyson Gay', lane: 6, finishTime: '9.80', status: 'q' },
+    { id: 'ath_t5', name: 'Asafa Powell', lane: 2, finishTime: '11.99', status: 'DNQ' },
+  ]);
+  const [windGauge, setWindGauge] = useState('+1.5');
 
   return (
     <div className="w-full bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
@@ -462,51 +470,86 @@ export function MultiSportScoringConsole({
         )}
 
         {/* ========================================================================= */}
-        {/* CRICKET DUAL-MODE HUB */}
+        {/* TRACK SPRINTS TIMEKEEPER CONSOLE */}
         {/* ========================================================================= */}
-        {sportType === 'cricket' && (
+        {sportType === 'track_sprint' && (
           <div className="space-y-6">
-            <div className="p-6 rounded-2xl bg-gradient-to-r from-emerald-950/50 via-slate-900 to-slate-950 border border-emerald-800/50">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded-full border border-emerald-800">
-                    Dual-Mode Federation Active
-                  </span>
-                  <h4 className="text-lg font-bold text-white mt-1">
-                    Cricket Scoring Router (PitchPulse™ Integrated)
-                  </h4>
-                </div>
-                <div className="text-right">
-                  <span className="text-xs text-slate-400">Lease Engine:</span>
-                  <div className="text-xs font-semibold text-emerald-400">
-                    {cricketLeaseHolder ? `Locked to ${cricketLeaseHolder}` : 'Available'}
-                  </div>
-                </div>
+            <div className="flex items-center justify-between bg-slate-950 px-4 py-3 rounded-xl border border-slate-800">
+              <div className="flex items-center space-x-2">
+                <span className="text-xs font-bold text-emerald-400 uppercase">
+                  Event: 100m Preliminary Heat 1
+                </span>
+                <span className="text-xs text-slate-400">• Standard 8 Lanes</span>
               </div>
-
-              <p className="text-xs text-slate-300 leading-relaxed max-w-2xl">
-                This cricket match can be scored natively within the Universal Web App or handed off to your dedicated <strong>PitchPulse™</strong> mobile/web sub-app via deep linking with real-time tournament bracket sync and concurrency lease locks.
-              </p>
-
-              <div className="flex items-center space-x-4 mt-6">
-                <a
-                  href={`pitchpulse://score/match/${matchId}`}
-                  onClick={() => setCricketLeaseHolder('PitchPulse Mobile')}
-                  className="px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs shadow-lg shadow-emerald-950/50 flex items-center space-x-2"
-                >
-                  <span>⚡ Open in Dedicated PitchPulse™ App</span>
-                  <span>➔</span>
-                </a>
-
-                <button
-                  onClick={() => setCricketLeaseHolder('Universal Web Console')}
-                  className="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700"
-                >
-                  Score In-App (Universal Keypad)
-                </button>
+              <div className="flex items-center space-x-2">
+                <span className="text-xs text-slate-400">Wind Gauge:</span>
+                <input
+                  type="text"
+                  value={windGauge}
+                  onChange={(e) => setWindGauge(e.target.value)}
+                  className="w-16 px-2 py-0.5 bg-slate-900 border border-slate-700 rounded text-center text-xs font-mono text-emerald-400"
+                />
+                <span className="text-xs text-slate-500">m/s</span>
               </div>
             </div>
+
+            <div className="overflow-x-auto rounded-xl border border-slate-800">
+              <table className="w-full text-left text-xs text-slate-300">
+                <thead className="bg-slate-950 text-slate-400 uppercase text-[10px]">
+                  <tr>
+                    <th className="py-3 px-3">Lane</th>
+                    <th className="py-3 px-4">Athlete Name</th>
+                    <th className="py-3 px-3">Finish Time (s)</th>
+                    <th className="py-3 px-3 text-right">Advancement Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60 bg-slate-900/40">
+                  {trackAthletes.map((ath, idx) => (
+                    <tr key={ath.id} className="hover:bg-slate-800/30">
+                      <td className="py-3 px-3 font-mono font-bold text-emerald-400">
+                        Lane {ath.lane}
+                      </td>
+                      <td className="py-3 px-4 font-semibold text-white">{ath.name}</td>
+                      <td className="py-3 px-3">
+                        <input
+                          type="text"
+                          value={ath.finishTime}
+                          onChange={(e) => {
+                            const updated = [...trackAthletes];
+                            updated[idx].finishTime = e.target.value;
+                            setTrackAthletes(updated);
+                          }}
+                          className="w-24 px-2 py-1 bg-slate-950 border border-slate-700 rounded text-white font-mono text-xs"
+                        />
+                      </td>
+                      <td className="py-3 px-3 text-right font-bold">
+                        {ath.status === 'Q' ? (
+                          <span className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">
+                            Q (Auto)
+                          </span>
+                        ) : ath.status === 'q' ? (
+                          <span className="px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800">
+                            q (Fast Time)
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-400">
+                            Eliminated
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* CRICKET DUAL-MODE HUB (NATIVE KEYPAD + PITCHPULSE HANDOFF) */}
+        {/* ========================================================================= */}
+        {sportType === 'cricket' && (
+          <NativeCricketScorer matchId={matchId} tournamentName={tournamentName} />
         )}
       </div>
     </div>

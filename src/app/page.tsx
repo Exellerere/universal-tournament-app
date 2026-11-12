@@ -6,6 +6,7 @@ import { SportType } from '@/engine';
 import { UniversalSportSelector } from '@/components/universal/UniversalSportSelector';
 import { UniversalCreateTournamentModal } from '@/components/universal/UniversalCreateTournamentModal';
 import { MultiSportScoringConsole } from '@/components/universal/MultiSportScoringConsole';
+import { UniversalBracketViewer } from '@/components/universal/UniversalBracketViewer';
 
 export default function UniversalTournamentDashboard() {
   const [activeSport, setActiveSport] = useState<SportType>('cricket');
@@ -160,80 +161,13 @@ export default function UniversalTournamentDashboard() {
 
         {/* TAB 2: BRACKETS & DRAW VIEW */}
         {activeTab === 'brackets' && (
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-white">Knockout Tournament Bracket</h3>
-                <p className="text-xs text-slate-400">
-                  Single elimination with automated Bye distribution for non-power-of-2 field sizes.
-                </p>
-              </div>
-              <button
-                onClick={() => showNotification('Bracket refreshed and seeded according to ranking.')}
-                className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 rounded-xl border border-slate-700"
-              >
-                🔄 Re-Seed Draw
-              </button>
-            </div>
-
-            {/* Visual Bracket Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
-              {/* Quarterfinals */}
-              <div className="space-y-4">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block border-b border-slate-800 pb-1">
-                  Quarterfinals
-                </span>
-                <div className="bg-slate-950/80 p-3.5 rounded-xl border border-slate-800 space-y-2">
-                  <div className="flex justify-between text-xs font-bold text-white">
-                    <span>Seed 1 (Arjun S.)</span>
-                    <span className="text-emerald-400">3</span>
-                  </div>
-                  <div className="flex justify-between text-xs text-slate-400">
-                    <span>Seed 8 (Karan V.)</span>
-                    <span>1</span>
-                  </div>
-                </div>
-
-                <div className="bg-slate-950/80 p-3.5 rounded-xl border border-slate-800 space-y-2">
-                  <div className="flex justify-between text-xs text-slate-400">
-                    <span>Seed 4 (Vikram R.)</span>
-                    <span>2</span>
-                  </div>
-                  <div className="flex justify-between text-xs font-bold text-white">
-                    <span>Seed 5 (Dev S.)</span>
-                    <span className="text-emerald-400">3</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Semifinals */}
-              <div className="space-y-4">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block border-b border-slate-800 pb-1">
-                  Semifinals
-                </span>
-                <div className="bg-slate-950/80 p-3.5 rounded-xl border border-emerald-500/40 shadow-lg space-y-2">
-                  <div className="flex justify-between text-xs font-bold text-white">
-                    <span>Arjun S.</span>
-                    <span className="text-amber-400 font-mono">LIVE (2-2)</span>
-                  </div>
-                  <div className="flex justify-between text-xs font-bold text-white">
-                    <span>Dev S.</span>
-                    <span className="text-amber-400 font-mono">Set 5</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Finals */}
-              <div className="space-y-4">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block border-b border-slate-800 pb-1">
-                  Grand Final
-                </span>
-                <div className="bg-slate-950/40 p-4 rounded-xl border border-dashed border-slate-800 text-center text-xs text-slate-500">
-                  Winner Semi 1 vs Winner Semi 2
-                </div>
-              </div>
-            </div>
-          </div>
+          <UniversalBracketViewer
+            sportType={activeSport}
+            onSelectMatchToScore={(matchId) => {
+              setActiveTab('console');
+              showNotification(`Switched to active scorer for match: ${matchId}`);
+            }}
+          />
         )}
 
         {/* TAB 3: STANDINGS VIEW */}
